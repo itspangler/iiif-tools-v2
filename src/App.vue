@@ -2,12 +2,22 @@
 <template>
   <section id="main">
 
-    <div class="container is-fluid" id="objectUrlInput">
+    <div class="container is-fluid">
     	<div class="box">
-        <input class="input" type="text" v-model="objectUrl" placeholder="Enter a Digital Collections or Digital Commonwealth URL">
-          <div class="buttons">
-            <button class="button is-primary" @click="resolveObjectUrl" >Open this collections object</button>
-          </div>
+
+        <div class="field has-addons">
+  <div class="control is-expanded">
+    <input class="input" type="text" v-model="objectUrl" placeholder="Enter a Digital Collections or Digital Commonwealth URL">
+  </div>
+  <div class="control">
+    <a class="button is-primary" @click="resolveObjectUrl">
+      Open this URL
+    </a>
+  </div>
+</div>
+
+        
+
       </div>
     </div>
   
@@ -17,17 +27,56 @@
 
     <div class="container is-fluid" :class="[manifestLoaded ? '' : 'is-hidden']">
       <div class="box">
+
         <h2 class="is-size-4">Object Information</h2>
 
-        <p><strong>Digital Commonwealth URL</strong><br>
-        <input class="input" type="text" readonly :value="dcObjectUrl"></p>
+        <div class="field has-addons">
+            <p class="control">
+    <a class="button is-static">
+      Digital Commonwealth URL 
+    </a>
+  </p>
+  <p class="control is-expanded">
+    <input class="input" type="text" readonly :value="dcObjectUrl">
+  </p>
 
-        <p><strong>LMEC Collections URL</strong><br>
-        <input class="input" type="text" readonly :value="lmecObjectUrl"></p>
+</div>
 
-         <p><strong>Permalink</strong><br>
-        <input class="input" type="text" readonly :value="arkLink"></p>
+        <div class="field has-addons">
+            <p class="control">
+    <a class="button is-static">
+      LMEC Collections URL
+    </a>
+  </p>
+  <p class="control is-expanded">
+    <input class="input" type="text" readonly :value="lmecObjectUrl">
+  </p>
 
+</div>
+
+        <div class="field has-addons">
+            <p class="control">
+    <a class="button is-static">
+      ARK Permalink
+    </a>
+  </p>
+  <p class="control is-expanded">
+    <input class="input" type="text" readonly :value="arkLink">
+  </p>
+
+</div>
+
+        <div class="field has-addons">
+            <p class="control">
+    <a class="button is-static">
+      IIIF Manifest
+    </a>
+  </p>
+  <p class="control is-expanded">
+    <input class="input" type="text" readonly :value="manifestUrl">
+  </p>
+
+</div>
       </div>
     </div>
 
@@ -56,24 +105,78 @@
       <div class="box">
         <h2 class="is-size-4">Sequence {{ this.loadedImg[0] }}, Canvas {{this.loadedImg[1] }}, Image {{this.loadedImg[2] }}</h2>
 
-        <p><strong>IIIF Image Endpoint</strong><br>
-        <input class="input" type="text" readonly :value="loadedImgIIIF"></p>
+                <div class="field has-addons">
+            <p class="control">
+    <a class="button is-static">
+      IIIF Image Endpoint
+    </a>
+  </p>
+  <p class="control is-expanded">
+    <input class="input" type="text" readonly :value="loadedImgIIIF">
+  </p>
+  </div>
 
-        <p><strong>Full Image</strong><br>
-        <input class="input" type="text" readonly :value="loadedImgIIIF + '/full/full/0/default.jpg'"></p>
-
+  <div class="field is-horizontal">
+  <div class="field-label is-normal">
+    <label class="label">Image Quality</label>
+  </div>
+  <div class="field-body">
+    <div class="field is-narrow">
+      <div class="control">
+        <div class="select is-fullwidth">
+          <select v-model="imgType">
+                    <option>default</option>
+                    <option>color</option>
+                    <option>gray</option>
+                    <option>bitonal</option>
+                  </select>
+        </div>
       </div>
     </div>
+  </div>
+</div>
 
-        <div class="container is-fluid">
-          <div class="box">
-          <p><strong>Extent Coordinates</strong><br>
-          <input class="input" type="text" readonly :value="extentCoords"></p>
+                <div class="field has-addons">
+            <p class="control">
+    <a class="button is-static">
+      Full Image
+    </a>
+  </p>
+  <p class="control is-expanded">
+    <input class="input" type="text" readonly :value="loadedImgIIIF + '/full/full/0/' + imgType + '.jpg'">
+  </p>
+  </div>
 
-          <p><strong>Extent Image</strong><br>
-          <input class="input" type="text" readonly :value="loadedImgIIIF + '/' + Math.round(extentCoords[0]) + ',' + Math.round(extentCoords[3]*-1) + ',' + Math.round(extentCoords[2]-extentCoords[0]) + ',' + Math.round(extentCoords[1]*-1 - extentCoords[3]*-1) + '/full/0/default.jpg'"></p>
+  </div></div>
+   <div class="container is-fluid" :class="[state === 'imageLoaded' ? '' : 'is-invisible']">
+      <div class="box">
 
-            <div id="ol-map"></div>
+
+                <div class="field has-addons">
+            <p class="control">
+    <a class="button is-static">
+      Extent Coordinate Array
+    </a>
+  </p>
+  <p class="control is-expanded">
+    <input class="input" type="text" readonly :value="extentCoords">
+  </p>
+  </div>
+
+                  <div class="field has-addons">
+            <p class="control">
+    <a class="button is-static">
+      Extent Image
+    </a>
+  </p>
+  <p class="control is-expanded">
+    <input class="input" type="text" readonly :value="loadedImgIIIF + '/' + Math.round(extentCoords[0]) + ',' + Math.round(extentCoords[3]*-1) + ',' + Math.round(extentCoords[2]-extentCoords[0]) + ',' + Math.round(extentCoords[1]*-1 - extentCoords[3]*-1) + '/full/0/' + imgType + '.jpg'">
+  </p>
+  </div>
+
+          <div id="ol-map"></div>
+
+
           </div>
         </div>
 
@@ -135,6 +238,7 @@ import ExtentInteraction from 'ol/interaction/Extent';
         objectId: '',
         manifest: '',
         loadedImg: [],
+        imgType: 'default',
         extentCoords: [0,0,0,0]
 
       }
@@ -143,7 +247,15 @@ import ExtentInteraction from 'ol/interaction/Extent';
     computed: {
       lmecObjectUrl: function(){ return `https://collections.leventhalmap.org/search/${this.objectId}`; },
       dcObjectUrl: function() { return `https://www.digitalcommonwealth.org/search/${this.objectId}`; },
-      arkLink: function() { return this.manifest.metadata ? this.manifest.metadata.filter(d => d.label === "Identifier" )[0].value[0] : ''; },
+      arkLink: function() { 
+        if(!this.manifest.metadata) { return ''; }
+        else {
+          var idf = this.manifest.metadata.filter(d => d.label === "Identifier" )[0].value;
+          if(typeof idf === 'string' || idf instanceof String){ return idf; } else { return idf[0]; }
+
+        }
+ },
+      manifestUrl: function() { return `https://www.digitalcommonwealth.org/search/${this.objectId}/manifest.json`; },
       loadedImgIIIF: function() { return this.manifest.sequences && this.loadedImg.length > 0 ? this.manifest.sequences[this.loadedImg[0]].canvases[this.loadedImg[1]].images[this.loadedImg[2]].resource.service["@id"] : ''; },
     },
 
@@ -165,7 +277,7 @@ import ExtentInteraction from 'ol/interaction/Extent';
        },
        getManifest: function() {
         //  Edit this pattern for different mappings from collections ID to Manifest
-          fetch(`https://www.digitalcommonwealth.org/search/${this.objectId}/manifest.json`)
+          fetch(this.manifestUrl)
             .then(r => r.json())
             .then(d => {this.manifest = d; this.manifestLoaded = true; })
             .catch(e => {this.state = 'error'; this.error = true; this.errorMessage = 'There is something wrong with the Manifest for this object. Check the URL to make sure it’s valid.'});
@@ -210,8 +322,18 @@ import ExtentInteraction from 'ol/interaction/Extent';
 </script>
 
 <style>
-
 @import "ol/ol.css";
+
 #ol-map { height: 500px; width: 100%; margin-top: 20px; background-color: #222; }
+
+#main > .container {
+	margin-top: 1rem;
+}
+
+li > ul {
+	margin-left: 15px;
+}
+
+
 
 </style>
