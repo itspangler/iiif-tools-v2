@@ -32,19 +32,22 @@
 
         <div class="field has-addons">
             <p class="control">
-    <a class="button is-static">
+    <a class="button is-link" :href="dcObjectUrl" target="_blank">
       Digital Commonwealth URL 
     </a>
   </p>
   <p class="control is-expanded">
-    <input class="input" type="text" readonly :value="dcObjectUrl">
+    <input class="input" type="text" readonly :value="dcObjectUrl" id="dcObjectUrl">
+  </p>
+  <p class="control">
+    <button class="button is-secondary" v-clipboard="() => dcObjectUrl">📋</button>
   </p>
 
 </div>
 
         <div class="field has-addons">
             <p class="control">
-    <a class="button is-static">
+    <a class="button is-link" :href="lmecObjectUrl" target="_blank">
       LMEC Collections URL
     </a>
   </p>
@@ -52,11 +55,15 @@
     <input class="input" type="text" readonly :value="lmecObjectUrl">
   </p>
 
+  <p class="control">
+    <button class="button is-secondary" v-clipboard="() => lmecObjectUrl">📋</button>
+  </p>
+
 </div>
 
         <div class="field has-addons">
             <p class="control">
-    <a class="button is-static">
+    <a class="button is-link" :href="arkLink" target="_blank">
       ARK Permalink
     </a>
   </p>
@@ -64,17 +71,26 @@
     <input class="input" type="text" readonly :value="arkLink">
   </p>
 
+    <p class="control">
+    <button class="button is-secondary" v-clipboard="() => arkLink">📋</button>
+  </p>
+
 </div>
 
         <div class="field has-addons">
             <p class="control">
-    <a class="button is-static">
+    <a class="button is-link" :href="manifestUrl" target="_blank">
       IIIF Manifest
     </a>
   </p>
   <p class="control is-expanded">
     <input class="input" type="text" readonly :value="manifestUrl">
   </p>
+
+    <p class="control">
+    <button class="button is-secondary" v-clipboard="() => manifestUrl">📋</button>
+  </p>
+
 
 </div>
       </div>
@@ -107,12 +123,16 @@
 
                 <div class="field has-addons">
             <p class="control">
-    <a class="button is-static">
+    <a class="button is-link" :href="loadedImgIIIF" target="_blank">
       IIIF Image Endpoint
     </a>
   </p>
   <p class="control is-expanded">
     <input class="input" type="text" readonly :value="loadedImgIIIF">
+  </p>
+
+      <p class="control">
+    <button class="button is-secondary" v-clipboard="() => loadedImgIIIF">📋</button>
   </p>
   </div>
 
@@ -134,16 +154,60 @@
       </div>
     </div>
   </div>
+
+  
+</div>
+
+  <div class="field is-horizontal">
+  <div class="field-label is-normal">
+    <label class="label">Image Resolution</label>
+  </div>
+  <div class="field-body">
+    <div class="field is-narrow">
+      <div class="control">
+        <div class="select is-fullwidth">
+          <select v-model="imgResolutionType">
+                    <option>full</option>
+                    <option>Maximum height</option>
+                    <option>Maximum width</option>
+                    <option>Percent</option>
+                  </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+</div>
+
+
+  <div class="field is-horizontal" v-if="imgResolutionType != 'full'">
+  <div class="field-label is-normal">
+    <label class="label">{{imgResolutionType}}</label>
+  </div>
+  <div class="field-body">
+    <div class="field is-narrow">
+      <div class="control">
+          <input class="input" type="text" v-model="imgResolutionVariable">
+        </div>
+    </div>
+  </div>
+
+  
 </div>
 
                 <div class="field has-addons">
             <p class="control">
-    <a class="button is-static">
-      Full Image
+    <a class="button is-link" :href="uncroppedImage" target="_blank">
+      Uncropped Image
     </a>
   </p>
   <p class="control is-expanded">
-    <input class="input" type="text" readonly :value="loadedImgIIIF + '/full/full/0/' + imgType + '.jpg'">
+    <input class="input" type="text" readonly :value="uncroppedImage">
+  </p>
+
+        <p class="control">
+    <button class="button is-secondary" v-clipboard="() => uncroppedImage">📋</button>
   </p>
   </div>
 
@@ -161,16 +225,22 @@
   <p class="control is-expanded">
     <input class="input" type="text" readonly :value="extentCoords">
   </p>
+          <p class="control">
+    <button class="button is-secondary" v-clipboard="() => extentCoords">📋</button>
+  </p>
   </div>
 
                   <div class="field has-addons">
             <p class="control">
-    <a class="button is-static">
-      Extent Image
+    <a class="button is-link" :href="croppedImage" target="_blank">
+      Cropped Image
     </a>
   </p>
   <p class="control is-expanded">
-    <input class="input" type="text" readonly :value="loadedImgIIIF + '/' + Math.round(extentCoords[0]) + ',' + Math.round(extentCoords[3]*-1) + ',' + Math.round(extentCoords[2]-extentCoords[0]) + ',' + Math.round(extentCoords[1]*-1 - extentCoords[3]*-1) + '/full/0/' + imgType + '.jpg'">
+    <input class="input" type="text" readonly :value="croppedImage">
+  </p>
+     <p class="control">
+    <button class="button is-secondary" v-clipboard="() => croppedImage">📋</button>
   </p>
   </div>
 
@@ -194,7 +264,10 @@ import IIIF from 'ol/source/IIIF';
 import IIIFInfo from 'ol/format/IIIFInfo';
 import ExtentInteraction from 'ol/interaction/Extent';
 
-  export default Vue.extend({
+import Clipboard from 'v-clipboard';
+Vue.use(Clipboard);
+
+export default Vue.extend({
 
     mounted() {
       this.layer = new TileLayer();
@@ -239,7 +312,9 @@ import ExtentInteraction from 'ol/interaction/Extent';
         manifest: '',
         loadedImg: [],
         imgType: 'default',
-        extentCoords: [0,0,0,0]
+        extentCoords: [0,0,0,0],
+        imgResolutionType: "full",
+        imgResolutionVariable: 1200
 
       }
     },
@@ -257,9 +332,24 @@ import ExtentInteraction from 'ol/interaction/Extent';
  },
       manifestUrl: function() { return `https://www.digitalcommonwealth.org/search/${this.objectId}/manifest.json`; },
       loadedImgIIIF: function() { return this.manifest.sequences && this.loadedImg.length > 0 ? this.manifest.sequences[this.loadedImg[0]].canvases[this.loadedImg[1]].images[this.loadedImg[2]].resource.service["@id"] : ''; },
+      resolution: function() {
+        if(this.imgResolutionType === 'full') { return "full"; }
+        else if(this.imgResolutionType === 'Maximum height') { return "," + this.imgResolutionVariable; }
+        else if(this.imgResolutionType === 'Maximum width') { return this.imgResolutionVariable + ','; }
+        else if(this.imgResolutionType === 'Percent') { return "pct:" + this.imgResolutionVariable; }
+
+      },
+      uncroppedImage: function(){ 
+          return this.loadedImgIIIF + '/' + 'full' + '/' + this.resolution + '/0/' + this.imgType + '.jpg';
+        },
+      croppedImage: function(){
+                  return this.loadedImgIIIF + '/' + Math.round(this.extentCoords[0]) + ',' + Math.round(this.extentCoords[3]*-1) + ',' + Math.round(this.extentCoords[2]-this.extentCoords[0]) + ',' + Math.round(this.extentCoords[1]*-1 - this.extentCoords[3]*-1) + '/' + this.resolution + '/0/' + this.imgType + '.jpg';
+
+      }
     },
 
     methods: {
+      
       resolveObjectUrl: function(e) { 
           const re = /commonwealth:[^//]+/;
           const match = re.exec(this.objectUrl)
