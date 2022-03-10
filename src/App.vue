@@ -21,17 +21,13 @@
       </div>
     </div>
 
-    <div
-      class="container is-fluid"
-      v-if="error"
-      id="error"
-    >
+    <div class="container is-fluid" v-if="error" id="error">
       <div class="notification is-warning is-light">{{ errorMessage }}</div>
     </div>
 
     <div
       class="container is-fluid"
-      v-if="manifestedLoaded && sourceType==='commonwealth'"
+      v-if="manifestLoaded && sourceType === 'commonwealth'"
     >
       <div class="box">
         <h2 class="is-size-4 mb-3">Object Information</h2>
@@ -260,7 +256,9 @@
       <div class="box">
         <div class="field has-addons">
           <p class="control">
-            <a class="button is-static"> Extent Coordinate Array </a>
+            <a class="button is-static">
+              Extent Coordinate Array (Map Format)
+            </a>
           </p>
           <p class="control is-expanded">
             <input class="input" type="text" readonly :value="extentCoords" />
@@ -269,6 +267,54 @@
             <button
               class="button is-secondary"
               v-clipboard="() => extentCoords"
+            >
+              📋
+            </button>
+          </p>
+        </div>
+
+        <div class="field has-addons">
+          <p class="control">
+            <a class="button is-static">
+              Extent Coordinate Array (Map Format, Rounded)
+            </a>
+          </p>
+          <p class="control is-expanded">
+            <input
+              class="input"
+              type="text"
+              readonly
+              :value="extentCoordsRounded"
+            />
+          </p>
+          <p class="control">
+            <button
+              class="button is-secondary"
+              v-clipboard="() => extentCoordsRounded"
+            >
+              📋
+            </button>
+          </p>
+        </div>
+
+        <div class="field has-addons">
+          <p class="control">
+            <a class="button is-static">
+              Extent Coordinate Array (IIIF Format)
+            </a>
+          </p>
+          <p class="control is-expanded">
+            <input
+              class="input"
+              type="text"
+              readonly
+              :value="extentCoordsIIIF"
+            />
+          </p>
+          <p class="control">
+            <button
+              class="button is-secondary"
+              v-clipboard="() => extentCoordsIIIF"
             >
               📋
             </button>
@@ -293,7 +339,9 @@
             </button>
           </p>
         </div>
-        <div class="notification is-info is-light">Shift and drag to select an extent</div>
+        <div class="notification is-info is-light">
+          Shift and drag to select an extent
+        </div>
         <div id="ol-map"></div>
       </div>
     </div>
@@ -366,10 +414,10 @@ export default Vue.extend({
 
   computed: {
     lmecObjectUrl: function () {
-      return `https://collections.leventhalmap.org/search/${this.objectId}`;
+      return `https://collections.leventhalmap.org/search/${this.commonwealthObjectId}`;
     },
     dcObjectUrl: function () {
-      return `https://www.digitalcommonwealth.org/search/${this.objectId}`;
+      return `https://www.digitalcommonwealth.org/search/${this.commonwealthObjectId}`;
     },
     arkLink: function () {
       if (!this.manifest.metadata) {
@@ -385,6 +433,15 @@ export default Vue.extend({
         }
       }
     },
+
+    extentCoordsRounded: function() {
+      return this.extentCoords.map(d=>Math.round(d));
+    },  
+
+    extentCoordsIIIF: function() {
+      let c = [this.extentCoords[0],this.extentCoords[3] * -1,this.extentCoords[2] - this.extentCoords[0],this.extentCoords[1] * -1 - this.extentCoords[3] * -1];
+      return c.map(d=>Math.round(d));
+    }
 
     loadedImgIIIF: function () {
       return this.manifest.sequences && this.loadedImg.length > 0
@@ -442,13 +499,26 @@ export default Vue.extend({
 
       const re = /commonwealth:[^//]+/;
       const match = re.exec(this.enteredUrl);
+
+
       if (match) {
         this.commonwealthObjectId = match[0];
         this.sourceType = 'commonwealth';
         this.manifestUrl = `https://www.digitalcommonwealth.org/search/${match[0]}/manifest.json`;
       } else {
-        this.sourceType = 'external';
-        this.manifestUrl = this.enteredUrl;
+
+              const re2 = /archive.org\/details\/[^//]+/;
+              const match2 = re2.exec(this.enteredUrl);
+
+              if(match2) {
+                  this.sourceType = 'external';
+                  this.manifestUrl = `https://iiif.archivelab.org/iiif/${match2[0].split("/")[2]}/manifest.json`;
+
+              } else {
+                  this.sourceType = 'external';
+                  this.manifestUrl = this.enteredUrl;
+              }
+
       }
       this.getManifest();
 
