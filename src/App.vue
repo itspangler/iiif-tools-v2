@@ -517,36 +517,11 @@ export default Vue.extend({
                   console.log(match3[0].slice(2))
                   if (match3) {
                       this.sourceType = 'commonwealth';
-                      const express = require('express');
-                  const request = require('request');
-
-                  const app = express();
-
-                  app.use((req, res, next) => {
-                    res.header('Access-Control-Allow-Origin', '*');
-                    next();
-                  });
-
-                  app.get(`/search/${match3[0].slice(2)}.json`, (req, res) => {
-                    request(
-                      { url: `https://www.digitalcommonwealth.org/search/${match3[0].slice(2)}.json` },
-                      (error, response, body) => {
-                        if (error || response.statusCode !== 200) {
-                          return res.status(500).json({ type: 'error', message: err.message });
-                        }
-
-                        res.json(JSON.parse(body));
-                      }
-                    )
-                  });
-
-                  const PORT = process.env.PORT || 3000;
-                  app.listen(PORT, () => console.log(`listening on ${PORT}`));
-                      // const req = new Request()
-                      // console.log(req)
-                      // fetch(req)
-                      //     .then((response) => response.json())
-                      //     .then((data) => console.log(data));
+                      const req = new Request(`https://www.digitalcommonwealth.org/search/${match3[0].slice(2)}.json`)
+                      console.log(req)
+                      fetch(req)
+                          .then((response) => response.json())
+                          .then((data) => console.log(data));
                   } else {
                     this.sourceType = 'external';
                     this.manifestUrl = this.enteredUrl;
