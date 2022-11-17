@@ -441,7 +441,7 @@ export default Vue.extend({
     extentCoordsIIIF: function() {
       let c = [this.extentCoords[0],this.extentCoords[3] * -1,this.extentCoords[2] - this.extentCoords[0],this.extentCoords[1] * -1 - this.extentCoords[3] * -1];
       return c.map(d=>Math.round(d));
-    }
+    },
 
     loadedImgIIIF: function () {
       return this.manifest.sequences && this.loadedImg.length > 0
@@ -497,27 +497,61 @@ export default Vue.extend({
       this.state = "loading";
       this.error = false;
 
-      const re = /commonwealth:[^//]+/;
+      const re = /search\/commonwealth:[^//]+/;
       const match = re.exec(this.enteredUrl);
-
 
       if (match) {
         this.commonwealthObjectId = match[0];
+        console.log(this.commonwealthObjectId);
         this.sourceType = 'commonwealth';
-        this.manifestUrl = `https://www.digitalcommonwealth.org/search/${match[0]}/manifest.json`;
+        this.manifestUrl = `https://www.digitalcommonwealth.org/${match[0]}/manifest.json`;
       } else {
-
               const re2 = /archive.org\/details\/[^//]+/;
               const match2 = re2.exec(this.enteredUrl);
-
-              if(match2) {
+              if (match2) {
                   this.sourceType = 'external';
                   this.manifestUrl = `https://iiif.archivelab.org/iiif/${match2[0].split("/")[2]}/manifest.json`;
-
               } else {
-                  this.sourceType = 'external';
-                  this.manifestUrl = this.enteredUrl;
-              }
+                  const re3 = /2\/commonwealth:[^//]+/;
+                  const match3 = re3.exec(this.enteredUrl);
+                  console.log(match3[0].slice(2))
+                  if (match3) {
+                      this.sourceType = 'commonwealth';
+                      const express = require('express');
+                  const request = require('request');
+
+                  const app = express();
+
+                  app.use((req, res, next) => {
+                    res.header('Access-Control-Allow-Origin', '*');
+                    next();
+                  });
+
+                  app.get(`/search/${match3[0].slice(2)}.json`, (req, res) => {
+                    request(
+                      { url: `https://www.digitalcommonwealth.org/search/${match3[0].slice(2)}.json` },
+                      (error, response, body) => {
+                        if (error || response.statusCode !== 200) {
+                          return res.status(500).json({ type: 'error', message: err.message });
+                        }
+
+                        res.json(JSON.parse(body));
+                      }
+                    )
+                  });
+
+                  const PORT = process.env.PORT || 3000;
+                  app.listen(PORT, () => console.log(`listening on ${PORT}`));
+                      // const req = new Request()
+                      // console.log(req)
+                      // fetch(req)
+                      //     .then((response) => response.json())
+                      //     .then((data) => console.log(data));
+                  } else {
+                    this.sourceType = 'external';
+                    this.manifestUrl = this.enteredUrl;
+                  }
+            }
 
       }
       this.getManifest();
@@ -530,6 +564,7 @@ export default Vue.extend({
         .then((r) => r.json())
         .then((d) => {
           this.manifest = d;
+          // console.log(d);
           this.manifestLoaded = true;
         })
         .catch((e) => {
